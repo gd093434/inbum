@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Daehyeon Cha Corporate</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f0f2f5; color: #1a1a1a; min-height: 100vh; }
+  .dash { padding: 20px; max-width: 1300px; margin: 0 auto; }
+
+  .top-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 8px; }
+  .top-bar h1 { font-size: 20px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+  .live-dot { width: 8px; height: 8px; border-radius: 50%; background: #1D9E75; animation: pulse 2s infinite; display: inline-block; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+  .top-right { display: flex; align-items: center; gap: 10px; }
+  .refresh-btn { font-size: 12px; cursor: pointer; border: 1px solid #ddd; border-radius: 8px; padding: 6px 14px; background: white; font-weight: 500; }
+  .refresh-btn:hover { background: #f5f5f5; }
+  .last-update { font-size: 11px; color: #999; }
+
+  .price-grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 12px; margin-bottom: 14px; }
+  .rate-grid  { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 12px; margin-bottom: 14px; }
+  .price-card { background: white; border: 1px solid #e8e8e8; border-radius: 14px; padding: 18px 16px; }
+  .price-card .label { font-size: 11px; color: #aaa; margin-bottom: 8px; letter-spacing: 0.05em; font-weight: 600; }
+  .price-card .value { font-size: 18px; font-weight: 700; color: #1a1a1a; word-break: break-all; line-height: 1.2; }
+  .price-card .sub { font-size: 12px; color: #888; margin-top: 6px; }
+  .up   { color: #1D9E75 !important; }
+  .down { color: #E24B4A !important; }
+
+  .section-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+  .card { background: white; border: 1px solid #e8e8e8; border-radius: 14px; padding: 18px; }
+  .card-title { font-size: 11px; font-weight: 700; color: #aaa; margin-bottom: 14px; letter-spacing: 0.06em; text-transform: uppercase; }
+
+  .chart-wrapper { height: 220px; }
+  iframe.tv-chart { width: 100%; height: 100%; border: none; border-radius: 8px; }
+
+  /* coin rows */
+  .coin-row { display: flex; align-items: center; padding: 10px 0; border-bottom: 1px solid #f5f5f5; gap: 10px; }
+  .coin-row:last-child { border-bottom: none; }
+  .coin-icon { width: 28px; height: 28px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
+  .coin-name { font-size: 13px; font-weight: 700; width: 52px; }
+  .coin-price { font-size: 13px; font-weight: 600; flex: 1; text-align: right; }
+  .coin-chg { font-size: 12px; font-weight: 700; min-width: 62px; text-align: right; }
+
+  /* stock grid */
+  .stock-card .s-name   { font-size: 11px; color: #bbb; margin-bottom: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .stock-card .s-price  { font-size: 16px; font-weight: 700; color: #1a1a1a; margin-bottom: 3px; }
+  .stock-card .s-chg    { font-size: 12px; font-weight: 600; }
+  .stock-card .s-krw    { font-size: 11px; color: #aaa; margin-top: 3px; }
+
+  /* fear gauge */
+  .fear-wrap { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  canvas#gauge { display: block; }
+  .fg-num  { font-size: 32px; font-weight: 700; line-height: 1; }
+  .fg-text { font-size: 15px; font-weight: 600; }
+  .fh-row  { display: flex; align-items: center; padding: 7px 0; border-bottom: 1px solid #f5f5f5; font-size: 12px; width: 100%; }
+  .fh-row:last-child { border-bottom: none; }
+  .fh-label    { color: #aaa; width: 70px; flex-shrink: 0; }
+  .fh-bar-wrap { flex: 1; margin: 0 10px; height: 5px; background: #f0f0f0; border-radius: 3px; overflow: hidden; }
+  .fh-bar      { height: 100%; border-radius: 3px; transition: width 0.6s ease; }
+  .fh-val      { font-size: 12px; font-weight: 700; min-width: 28px; text-align: right; }
+  .fh-history  { width: 100%; margin-top: 10px; }
+
+  .skeleton { background: linear-gradient(90deg,#f0f0f0 25%,#e0e0e0 50%,#f0f0f0 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 6px; height: 22px; width: 80%; }
+  @keyframes shimmer { 0%{background-position:200%} 100%{background-position:-200%} }
+
+  .note { font-size: 10px; color: #ccc; margin-top: 12px; text-align: right; }
+
+  @media (max-width: 900px) {
+  }
+  @media (max-width: 700px) {
+    .price-grid, .rate-grid { grid-template-columns: repeat(2,1fr); }
+    .section-grid { grid-template-columns: 1fr; }
+    .price-card .value { font-size: 15px; }
+  }
+  #mp-file { display: none; }
+</style>
+</head>
+<body>
+<div class="dash">
+
+  <!-- 헤더 -->
+  <div class="top-bar">
+    <h1><span class="live-dot"></span> Daehyeon Cha Corporate</h1>
+    <div class="top-right">
+      <span class="last-update" id="update-time">불러오는 중...</span>
+      <button class="refresh-btn" onclick="fetchAll()">↺ 새로고침</button>
+    </div>
+  </div>
+
+  <!-- Ceed 정보 -->
+  <div style="display:flex; gap:12px; margin-bottom:14px; flex-wrap:wrap;">
+    <div style="background:white; border:1px solid #e8e8e8; border-radius:12px; padding:12px 20px; display:flex; align-items:center; gap:10px;">
+      <span style="font-size:11px; color:#aaa; font-weight:600; letter-spacing:0.05em;">CEED 총액</span>
+      <span style="font-size:18px; font-weight:700; color:#1a1a1a;">$25,362</span>
+    </div>
+    <div style="background:white; border:1px solid #e8e8e8; border-radius:12px; padding:12px 20px; display:flex; align-items:center; gap:10px;">
+      <span style="font-size:11px; color:#aaa; font-weight:600; letter-spacing:0.05em;">손실액</span>
+      <span style="font-size:18px; font-weight:700; color:#E24B4A;">-$18,116</span>
+    </div>
+  </div>
+
+  <!-- BTC 가격 3종 -->
+  <div class="price-grid">
+    <div class="price-card">
+      <div class="label">BTC / KRW</div>
+      <div class="value" id="btc-krw"><div class="skeleton"></div></div>
+      <div class="sub"   id="btc-krw-chg">코인게코 기준</div>
+    </div>
+    <div class="price-card">
+      <div class="label">BTC / USD</div>
+      <div class="value" id="btc-usd"><div class="skeleton"></div></div>
+      <div class="sub"   id="btc-usd-chg">코인게코 기준</div>
+    </div>
+  </div>
+
+  <!-- 환율 + 김프 -->
+  <div class="rate-grid" style="grid-template-columns:repeat(2,1fr)">
+    <div class="price-card">
+      <div class="label">원화 / 테더 (USDT/KRW)</div>
+      <div class="value" id="rate-usdtkrw"><div class="skeleton"></div></div>
+      <div class="sub"   id="rate-usdtkrw-sub">업비트 기준</div>
+    </div>
+    <div class="price-card">
+      <div class="label">김치프리미엄</div>
+      <div class="value" id="kimp-val"><div class="skeleton"></div></div>
+      <div class="sub"   id="kimp-fx">환율 계산 중...</div>
+    </div>
+  </div>
+
+  <!-- 트레이딩 경력 -->
+  <div style="background:white; border:1px solid #e8e8e8; border-radius:14px; padding:22px 28px; margin-bottom:14px;">
+    <div style="font-size:11px; font-weight:700; color:#aaa; letter-spacing:0.06em; text-transform:uppercase; margin-bottom:16px;">Trading Career</div>
+    <div style="display:flex; gap:32px; flex-wrap:wrap; align-items:flex-start;">
+      <div>
+        <div style="font-size:11px; color:#aaa; margin-bottom:4px;">경력</div>
+        <div style="font-size:20px; font-weight:700; color:#1a1a1a;">2019 — 2026</div>
+        <div style="font-size:12px; color:#888; margin-top:2px;">7년간 실전 트레이딩</div>
+      </div>
+      <div style="width:1px; background:#f0f0f0; align-self:stretch;"></div>
+      <div>
+        <div style="font-size:11px; color:#aaa; margin-bottom:4px;">최대 수익 달성</div>
+        <div style="font-size:20px; font-weight:700; color:#1D9E75;">₩100,000,000</div>
+        <div style="font-size:12px; color:#888; margin-top:2px;">단일 포지션 최고 수익</div>
+      </div>
+      <div style="width:1px; background:#f0f0f0; align-self:stretch;"></div>
+      <div style="flex:1; min-width:200px;">
+        <div style="font-size:11px; color:#aaa; margin-bottom:10px; letter-spacing:0.05em;">MOTTO</div>
+        <div style="font-size:15px; font-weight:700; color:#1a1a1a; line-height:2;">
+          조인범처럼 트레이딩하자.<br>
+          <span style="color:#1D9E75;">고, 고, 저</span> &nbsp;/&nbsp; <span style="color:#E24B4A;">저, 저, 고</span>를 생각하고 매매하자.
+        </div>
+      </div>
+      <div style="width:1px; background:#f0f0f0; align-self:stretch;"></div>
+      <div style="flex:1; min-width:200px;">
+        <div style="font-size:11px; color:#aaa; margin-bottom:10px; letter-spacing:0.05em;">STRATEGY</div>
+        <div style="font-size:15px; font-weight:700; color:#1a1a1a; line-height:2;">
+          Dan처럼 <span style="color:#5B8DEF;">크립토퀀트</span>를 참고하면서<br>중장기적으로 하자.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 차트 2개 -->
+  <div class="section-grid">
+    <div class="card">
+      <div class="card-title">USD / KRW 환율 차트</div>
+      <div class="chart-wrapper">
+        <iframe class="tv-chart"
+          src="https://s.tradingview.com/widgetembed/?symbol=FX_IDC%3AUSDKRW&interval=60&hidesidetoolbar=1&hidetoptoolbar=1&theme=light&style=1&timezone=Asia%2FSeoul&locale=kr"
+          allowtransparency="true" allowfullscreen></iframe>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">업비트 BTC / USDT 차트</div>
+      <div class="chart-wrapper">
+        <iframe class="tv-chart"
+          src="https://s.tradingview.com/widgetembed/?symbol=UPBIT%3ABTCUSDT&interval=60&hidesidetoolbar=1&hidetoptoolbar=1&theme=light&style=1&timezone=Asia%2FSeoul&locale=kr"
+          allowtransparency="true" allowfullscreen></iframe>
+      </div>
+    </div>
+  </div>
+
+  <!-- 코인 목록 + 공포탐욕 -->
+  <div class="section-grid">
+    <div class="card">
+      <div class="card-title">주요 코인 시세</div>
+      <div id="coin-list">
+        <div class="skeleton" style="margin:8px 0"></div>
+        <div class="skeleton" style="margin:8px 0"></div>
+        <div class="skeleton" style="margin:8px 0"></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">공포 &amp; 탐욕 지수</div>
+      <div class="fear-wrap">
+        <canvas id="gauge" width="200" height="110"></canvas>
+        <div class="fg-num"  id="fg-num">—</div>
+        <div class="fg-text" id="fg-text">불러오는 중...</div>
+        <div class="fh-history" id="fh-history"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 주식 섹션 - TradingView Market Overview -->
+  <div class="card" style="margin-bottom:20px; padding:0; overflow:hidden; border-radius:14px;">
+    <div class="tradingview-widget-container" style="height:550px;">
+      <div class="tradingview-widget-container__widget" style="height:100%;width:100%;"></div>
+      <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-market-overview.js" async>
+      {
+        "colorTheme": "light",
+        "dateRange": "1D",
+        "showChart": true,
+        "locale": "kr",
+        "largeChartUrl": "",
+        "isTransparent": false,
+        "showSymbolLogo": true,
+        "showFloatingTooltip": false,
+        "width": "100%",
+        "height": "550",
+        "tabs": [
+          {
+            "title": "주식",
+            "symbols": [
+              {"s": "NASDAQ:TSLA", "d": "테슬라"},
+              {"s": "NASDAQ:AAPL", "d": "애플"},
+              {"s": "NASDAQ:MSFT", "d": "마이크로소프트"},
+              {"s": "NASDAQ:GOOGL", "d": "구글"},
+              {"s": "NASDAQ:PLTR", "d": "팔란티어"},
+              {"s": "NASDAQ:RKLB", "d": "로켓랩"},
+              {"s": "NASDAQ:NFLX", "d": "넷플릭스"},
+              {"s": "NASDAQ:NVDA", "d": "엔비디아"},
+              {"s": "KRX:005930", "d": "삼성전자"}
+            ],
+            "originalTitle": "Stocks"
+          }
+        ]
+      }
+      </script>
+    </div>
+  </div>
+
+</div><!-- .dash -->
+
+<script>
+const fmt    = (n, d=0) => Number(n).toLocaleString('ko-KR', {maximumFractionDigits:d, minimumFractionDigits:d});
+const fmtUSD = (n) => '$' + Number(n).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+const clr  = v => v > 0 ? '#1D9E75' : v < 0 ? '#E24B4A' : '#888';
+const cls  = v => v > 0 ? 'up' : v < 0 ? 'down' : '';
+const sign = v => v >= 0 ? '+' : '';
+
+const fgMeta = v => {
+  if (v<=24) return {t:'극도의 공포', c:'#E24B4A'};
+  if (v<=44) return {t:'공포',       c:'#D85A30'};
+  if (v<=55) return {t:'중립',       c:'#EF9F27'};
+  if (v<=74) return {t:'탐욕',       c:'#97C459'};
+  return           {t:'극도의 탐욕', c:'#1D9E75'};
+};
+
+function drawGauge(v) {
+  const ctx = document.getElementById('gauge').getContext('2d');
+  ctx.clearRect(0,0,200,110);
+  ['#E24B4A','#D85A30','#EF9F27','#97C459','#1D9E75'].forEach((c,i) => {
+    ctx.beginPath();
+    ctx.arc(100,100,85,Math.PI+(i/5)*Math.PI, Math.PI+((i+1)/5)*Math.PI);
+    ctx.arc(100,100,62,Math.PI+((i+1)/5)*Math.PI, Math.PI+(i/5)*Math.PI, true);
+    ctx.closePath(); ctx.fillStyle=c; ctx.fill();
+  });
+  const a = Math.PI+(v/100)*Math.PI;
+  ctx.beginPath(); ctx.moveTo(100,100);
+  ctx.lineTo(100+72*Math.cos(a), 100+72*Math.sin(a));
+  ctx.strokeStyle='#222'; ctx.lineWidth=3; ctx.stroke();
+  ctx.beginPath(); ctx.arc(100,100,7,0,Math.PI*2);
+  ctx.fillStyle='#222'; ctx.fill();
+}
+
+async function get(url) {
+  const r = await fetch(url, {headers:{'Accept':'application/json'}});
+  if (!r.ok) throw new Error(r.status);
+  return r.json();
+}
+
+
+
+
+
+function coinImg(id) {
+  const m = {bitcoin:'1',ethereum:'279',ripple:'44',solana:'4128',dogecoin:'5'};
+  return m[id]||'1';
+}
+
+async function fetchAll() {
+  document.getElementById('update-time').textContent = '업데이트 중...';
+
+  const cgP    = get('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,ripple,solana,dogecoin,tether&vs_currencies=krw,usd&include_24hr_change=true');
+  const upP    = get('https://api.upbit.com/v1/ticker?markets=KRW-BTC,KRW-USDT');
+  const fgP    = (async () => {
+    // Try multiple fear & greed endpoints
+    for (const url of [
+      'https://api.alternative.me/fng/?limit=4&format=json',
+      'https://api.allorigins.win/raw?url=' + encodeURIComponent('https://api.alternative.me/fng/?limit=4'),
+      'https://corsproxy.io/?' + encodeURIComponent('https://api.alternative.me/fng/?limit=4')
+    ]) {
+      try { const r = await get(url); if (r?.data?.length) return r; } catch(e) {}
+    }
+    return null;
+  })();
+  const fxP    = (async () => {
+    // 1순위: exchangerate.host (외환 시장 기준, 실시간)
+    try {
+      const r = await get('https://api.exchangerate.host/latest?base=USD&symbols=KRW');
+      if (r?.rates?.KRW) return { rates: { KRW: r.rates.KRW } };
+    } catch(e) {}
+    // 2순위: fxratesapi
+    try {
+      const r = await get('https://fxratesapi.com/api/latest?base=USD&currencies=KRW');
+      if (r?.data?.KRW) return { rates: { KRW: r.data.KRW } };
+    } catch(e) {}
+    // 3순위: open.er-api
+    try { return await get('https://open.er-api.com/v6/latest/USD'); } catch(e) {}
+    // 4순위: 업비트 fallback
+    try {
+      const r = await get('https://api.upbit.com/v1/ticker?markets=KRW-USDT');
+      if (r?.[0]?.trade_price) return { _upbit: r[0].trade_price };
+    } catch(e) {}
+    return null;
+  })();
+
+  const [cg, upbit, fg, fx] = await Promise.allSettled([cgP, upP, fgP, fxP])
+    .then(r => r.map(x => x.status==='fulfilled' ? x.value : null));
+
+  // ── BTC 카드 ──
+  let usdKrw = 1380;
+  if (cg) {
+    const btcKrw = cg.bitcoin?.krw || 0;
+    const btcUsd = cg.bitcoin?.usd || 0;
+    const krwChg = cg.bitcoin?.krw_24h_change || 0;
+    const usdChg = cg.bitcoin?.usd_24h_change || 0;
+
+    document.getElementById('btc-krw').textContent = '₩' + fmt(btcKrw);
+    const kc = document.getElementById('btc-krw-chg');
+    kc.textContent = sign(krwChg) + krwChg.toFixed(2) + '% (24h)';
+    kc.className = 'sub ' + cls(krwChg);
+
+    document.getElementById('btc-usd').textContent = '$' + fmt(btcUsd);
+    const uc = document.getElementById('btc-usd-chg');
+    uc.textContent = sign(usdChg) + usdChg.toFixed(2) + '% (24h)';
+    uc.className = 'sub ' + cls(usdChg);
+
+    usdKrw = fx?._upbit || fx?.rates?.KRW || fx?.conversion_rates?.KRW || (btcUsd>0 ? btcKrw/btcUsd : 1380);
+
+    if (btcUsd > 0) {
+      const kimp = ((btcKrw - btcUsd*usdKrw) / (btcUsd*usdKrw)) * 100;
+      const ke = document.getElementById('kimp-val');
+      ke.textContent = sign(kimp) + kimp.toFixed(2) + '%';
+      ke.className = 'value ' + cls(kimp);
+      document.getElementById('kimp-fx').textContent = `환율: ${fmt(usdKrw,1)}원/달러`;
+    }
+
+    // 코인 목록
+    const coins = [
+      {id:'bitcoin',name:'BTC'},{id:'ethereum',name:'ETH'},
+      {id:'ripple',name:'XRP'},{id:'solana',name:'SOL'},{id:'dogecoin',name:'DOGE'}
+    ];
+    let html = '';
+    for (const c of coins) {
+      const d = cg[c.id]; if(!d) continue;
+      const chg = d.krw_24h_change||0;
+      html += `<div class="coin-row">
+        <img class="coin-icon" src="https://assets.coingecko.com/coins/images/${coinImg(c.id)}/thumb/logo.png" onerror="this.style.display='none'">
+        <div class="coin-name">${c.name}</div>
+        <div class="coin-price">₩${fmt(d.krw)}</div>
+        <div class="coin-chg" style="color:${clr(chg)}">${sign(chg)}${chg.toFixed(2)}%</div>
+      </div>`;
+    }
+    document.getElementById('coin-list').innerHTML = html || '<div style="color:#aaa;padding:16px;text-align:center">데이터 없음</div>';
+  }
+
+  // ── USDT/KRW from 업비트 KRW-USDT ──
+  if (upbit) {
+    const um = {};
+    upbit.forEach(d => { um[d.market] = d; });
+    const usdtData = um['KRW-USDT'];
+    if (usdtData) {
+      const usdtKrw = usdtData.trade_price || 0;
+      const usdtChg = (usdtData.signed_change_rate || 0) * 100;
+      document.getElementById('rate-usdtkrw').textContent = '₩' + fmt(usdtKrw, 1);
+      const s = document.getElementById('rate-usdtkrw-sub');
+      s.textContent = sign(usdtChg) + usdtChg.toFixed(2) + '% (24h)';
+      s.className = 'sub ' + cls(usdtChg);
+    }
+  }
+
+  // ── 공포탐욕 ──
+  if (fg?.data?.length) {
+    const v = parseInt(fg.data[0].value), m = fgMeta(v);
+    document.getElementById('fg-num').textContent  = v;
+    document.getElementById('fg-num').style.color  = m.c;
+    document.getElementById('fg-text').textContent = m.t;
+    document.getElementById('fg-text').style.color = m.c;
+    drawGauge(v);
+    const periods = ['오늘','1주 전','1개월 전','1년 전'];
+    let fh='';
+    fg.data.slice(0,4).forEach((item,i)=>{
+      const iv=parseInt(item.value), im=fgMeta(iv);
+      fh+=`<div class="fh-row">
+        <span class="fh-label">${periods[i]||''}</span>
+        <div class="fh-bar-wrap"><div class="fh-bar" style="width:${iv}%;background:${im.c}"></div></div>
+        <span class="fh-val" style="color:${im.c}">${iv}</span>
+      </div>`;
+    });
+    document.getElementById('fh-history').innerHTML = fh;
+  }
+
+  const now = new Date();
+  document.getElementById('update-time').textContent =
+    `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')} 기준`;
+}
+
+fetchAll();
+setInterval(fetchAll, 60000);
+
+
+
+</script>
+
+<!-- 뮤직 플레이어 -->
+<style>
+  #mplayer { position:fixed; bottom:20px; right:20px; z-index:9999; }
+  #mp-fab {
+    width:52px; height:52px; border-radius:50%;
+    background:#1a1a1a; color:white; font-size:22px; border:none;
+    cursor:pointer; display:flex; align-items:center; justify-content:center;
+    box-shadow:0 4px 16px rgba(0,0,0,0.2);
+  }
+  #mp-fab:hover { background:#333; }
+  #mp-panel {
+    display:none; background:white; border-radius:18px;
+    border:1px solid #e8e8e8; box-shadow:0 8px 32px rgba(0,0,0,0.14);
+    width:288px; padding:16px; margin-bottom:10px;
+  }
+  #mp-panel.open { display:block; }
+  .mp-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; }
+  .mp-head-title { font-size:13px; font-weight:700; color:#1a1a1a; }
+  .mp-x { background:none; border:none; font-size:16px; color:#bbb; cursor:pointer; padding:0 4px; line-height:1; }
+  .mp-x:hover { color:#555; }
+  .mp-name { font-size:13px; font-weight:600; color:#1a1a1a; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-bottom:2px; }
+  .mp-sub  { font-size:11px; color:#aaa; margin-bottom:12px; }
+  .mp-seekrow { display:flex; align-items:center; gap:6px; margin-bottom:10px; }
+  .mp-seekrow input { flex:1; accent-color:#1a1a1a; cursor:pointer; height:4px; }
+  .mp-t { font-size:10px; color:#bbb; min-width:30px; }
+  .mp-t.r { text-align:right; }
+  .mp-ctrl { display:flex; align-items:center; justify-content:center; gap:12px; margin-bottom:12px; }
+  .mp-btn  { background:none; border:none; cursor:pointer; font-size:20px; color:#555; border-radius:8px; padding:4px 8px; }
+  .mp-btn:hover { background:#f5f5f5; color:#1a1a1a; }
+  .mp-play { width:44px; height:44px; border-radius:50%; background:#1a1a1a; color:white;
+    font-size:16px; border:none; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+  .mp-play:hover { background:#333; }
+  .mp-volrow { display:flex; align-items:center; gap:8px; margin-bottom:14px; }
+  .mp-volrow input { flex:1; accent-color:#888; cursor:pointer; }
+  .mp-vollbl { font-size:10px; color:#bbb; min-width:28px; text-align:right; }
+  .mp-filebtn {
+    display:block; width:100%; padding:10px; background:#f8f8f8;
+    border:1.5px dashed #ddd; border-radius:10px; text-align:center;
+    font-size:12px; color:#888; cursor:pointer; box-sizing:border-box;
+  }
+  .mp-filebtn:hover { background:#f0f0f0; border-color:#bbb; color:#555; }
+  #mp-fileinput { display:none; }
+</style>
+
+<div id="mplayer">
+  <div id="mp-panel">
+    <div class="mp-head">
+      <div class="mp-head-title">🎵 음악 플레이어</div>
+      <button class="mp-x" onclick="mpClose()">✕</button>
+    </div>
+    <!-- 파일 로드 후 -->
+    <div id="mp-loaded" style="display:none">
+      <div class="mp-name" id="mp-name">—</div>
+      <div class="mp-sub"  id="mp-sub">준비 중...</div>
+      <div class="mp-seekrow">
+        <span class="mp-t" id="mp-cur">0:00</span>
+        <input type="range" id="mp-seek" min="0" max="100" value="0" step="0.1" oninput="mpSeek(this.value)">
+        <span class="mp-t r" id="mp-dur">0:00</span>
+      </div>
+      <div class="mp-ctrl">
+        <button class="mp-btn" onclick="mpSkip(-15)" title="-15초">⏪</button>
+        <button class="mp-play" id="mp-playbtn" onclick="mpToggle()">▶</button>
+        <button class="mp-btn" onclick="mpSkip(15)"  title="+15초">⏩</button>
+      </div>
+      <div class="mp-volrow">
+        <span style="font-size:14px">🔉</span>
+        <input type="range" id="mp-vol" min="0" max="100" value="80" oninput="mpVol(this.value)">
+        <span class="mp-vollbl" id="mp-vollbl">80%</span>
+      </div>
+      <label class="mp-filebtn" for="mp-fileinput" style="font-size:11px">📂 다른 파일로 바꾸기</label>
+    </div>
+    <!-- 초기 상태 -->
+    <div id="mp-empty">
+      <p style="font-size:12px;color:#aaa;margin-bottom:12px;line-height:1.7;text-align:center">
+        MP3 파일을 선택하면<br>바로 재생돼요
+      </p>
+      <label class="mp-filebtn" for="mp-fileinput">
+        📂 MP3 파일 선택하기
+        <span style="display:block;font-size:10px;color:#ccc;margin-top:3px">클릭해서 파일 선택</span>
+      </label>
+    </div>
+    <input type="file" id="mp-fileinput" accept="audio/mp3,audio/mpeg,audio/*" onchange="mpLoad(this)">
+  </div>
+  <button id="mp-fab" onclick="mpOpen()">🎵</button>
+</div>
+<audio id="mp-audio"></audio>
+
+<script>
+(function(){
+  const au = document.getElementById('mp-audio');
+  au.volume = 0.8;
+
+  function fmt(s) {
+    s = Math.floor(s || 0);
+    return Math.floor(s/60) + ':' + String(s%60).padStart(2,'0');
+  }
+
+  au.ontimeupdate = () => {
+    if (!au.duration) return;
+    document.getElementById('mp-seek').value = au.currentTime / au.duration * 100;
+    document.getElementById('mp-cur').textContent = fmt(au.currentTime);
+  };
+  au.onloadedmetadata = () => {
+    document.getElementById('mp-dur').textContent = fmt(au.duration);
+    document.getElementById('mp-sub').textContent = fmt(au.duration) + ' · 재생 준비됨';
+  };
+  au.onplay  = () => { document.getElementById('mp-playbtn').textContent = '⏸'; };
+  au.onpause = () => { document.getElementById('mp-playbtn').textContent = '▶'; };
+  au.onended = () => {
+    document.getElementById('mp-playbtn').textContent = '▶';
+    document.getElementById('mp-seek').value = 0;
+    document.getElementById('mp-cur').textContent = '0:00';
+  };
+  au.onerror = () => {
+    document.getElementById('mp-sub').textContent = '⚠️ 재생할 수 없는 파일이에요';
+  };
+
+  window.mpLoad = function(input) {
+    const f = input.files[0];
+    if (!f) return;
+    au.src = URL.createObjectURL(f);
+    au.load();
+    document.getElementById('mp-name').textContent = f.name.replace(/\.[^.]+$/, '');
+    document.getElementById('mp-sub').textContent = '로딩 중...';
+    document.getElementById('mp-empty').style.display  = 'none';
+    document.getElementById('mp-loaded').style.display = 'block';
+    au.play().catch(() => {
+      document.getElementById('mp-sub').textContent = '▶ 버튼을 눌러 재생하세요';
+    });
+  };
+
+  window.mpToggle = function() { au.paused ? au.play().catch(()=>{}) : au.pause(); };
+  window.mpSkip   = function(s) { au.currentTime = Math.max(0, Math.min(au.duration||0, au.currentTime+s)); };
+  window.mpSeek   = function(v) { if (au.duration) au.currentTime = v/100*au.duration; };
+  window.mpVol    = function(v) {
+    au.volume = v/100;
+    document.getElementById('mp-vollbl').textContent = v + '%';
+  };
+  window.mpOpen  = function() {
+    document.getElementById('mp-panel').classList.add('open');
+    document.getElementById('mp-fab').style.display = 'none';
+  };
+  window.mpClose = function() {
+    document.getElementById('mp-panel').classList.remove('open');
+    document.getElementById('mp-fab').style.display = 'flex';
+  };
+
+  // 기본 트랙 자동 로드
+  const defaultUrl = 'https://drive.google.com/uc?export=download&id=1nheCko-3lG71gk5SZybQSl2YaRTzCJHX';
+  au.src = defaultUrl;
+  au.load();
+  document.getElementById('mp-name').textContent = 'My Track';
+  document.getElementById('mp-sub').textContent = '로딩 중...';
+  document.getElementById('mp-empty').style.display  = 'none';
+  document.getElementById('mp-loaded').style.display = 'block';
+  au.addEventListener('canplay', () => {
+    document.getElementById('mp-sub').textContent = '▶ 버튼을 눌러 재생하세요';
+  }, { once: true });
+  au.onerror = () => {
+    document.getElementById('mp-sub').textContent = '⚠️ 로드 실패 — 파일 직접 선택하세요';
+    document.getElementById('mp-empty').style.display  = 'block';
+    document.getElementById('mp-loaded').style.display = 'none';
+  };
+})();
+</script>
+
+</body>
+</html>
